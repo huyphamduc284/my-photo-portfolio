@@ -5,14 +5,9 @@ import Link from "next/link";
 import type { Photo } from "@/types/photo";
 import type { ArchiveMonth } from "@/lib/archive";
 import PhotoItem from "@/components/PhotoItem";
+import { archivePhotoFrameClass } from "@/lib/photos";
 
 const BATCH = 8;
-const WIDTHS = [
-  "md:w-[82%]",
-  "md:ml-[10%] md:w-[48%]",
-  "md:ml-auto md:w-[70%]",
-  "md:w-[58%]",
-];
 
 type ArchiveChronologyProps = {
   months: ArchiveMonth[];
@@ -114,7 +109,7 @@ function MonthSection({
       </header>
       <div className="flex flex-col gap-14 md:gap-20">
         {visible.map((photo, index) => (
-          <div key={photo.id} className={`w-full ${WIDTHS[index % WIDTHS.length]}`}>
+          <div key={photo.id} className={archivePhotoFrameClass(photo, index)}>
             <PhotoItem
               photo={photo}
               showMeta

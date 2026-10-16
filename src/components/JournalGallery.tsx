@@ -5,7 +5,7 @@ import type { Photo } from "@/types/photo";
 import PhotoItem from "@/components/PhotoItem";
 import Lightbox from "@/components/Lightbox";
 import HandwrittenNote from "@/components/HandwrittenNote";
-import { FEATURED_SIZES } from "@/lib/photos";
+import { FEATURED_SIZES, journalPhotoFrameClass } from "@/lib/photos";
 
 type JournalGalleryProps = {
   photos: Photo[];
@@ -36,21 +36,25 @@ export default function JournalGallery({ photos }: JournalGalleryProps) {
   }, [photos]);
 
   const [first, ...rest] = photos;
+  const pair = rest.slice(0, 2);
+  const remainder = rest.slice(2);
 
   return (
     <>
       {first ? (
-        <div className="mt-12">
+        <div className={`mt-12 ${journalPhotoFrameClass(first, "cover")}`}>
           <PhotoItem
             photo={first}
             showMeta={false}
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 850px"
+            quality={95}
+            eager
             onSelect={onSelect}
           />
         </div>
       ) : null}
 
-      {rest.length > 0 ? (
+      {pair.length > 0 ? (
         <>
           <div className="my-14 flex justify-end">
             <HandwrittenNote className="max-w-[10rem] text-right text-muted">
@@ -59,22 +63,27 @@ export default function JournalGallery({ photos }: JournalGalleryProps) {
             </HandwrittenNote>
           </div>
           <div className="grid gap-8 md:grid-cols-2 md:items-end md:gap-10">
-            {rest.slice(0, 2).map((photo) => (
-              <PhotoItem
-                key={photo.id}
-                photo={photo}
-                sizes={FEATURED_SIZES}
-                scrapbook={photo.orientation === "portrait" ? "print" : "none"}
-                onSelect={onSelect}
-              />
+            {pair.map((photo) => (
+              <div key={photo.id} className={journalPhotoFrameClass(photo, "pair")}>
+                <PhotoItem
+                  photo={photo}
+                  sizes={FEATURED_SIZES}
+                  scrapbook={photo.orientation === "portrait" ? "print" : "none"}
+                  onSelect={onSelect}
+                />
+              </div>
             ))}
           </div>
         </>
       ) : null}
 
-      {rest.slice(2).map((photo) => (
-        <div key={photo.id} className="mt-16">
-          <PhotoItem photo={photo} sizes="100vw" onSelect={onSelect} />
+      {remainder.map((photo) => (
+        <div key={photo.id} className={`mt-16 ${journalPhotoFrameClass(photo, "single")}`}>
+          <PhotoItem
+            photo={photo}
+            sizes="(max-width: 768px) 100vw, 850px"
+            onSelect={onSelect}
+          />
         </div>
       ))}
 

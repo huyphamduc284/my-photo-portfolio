@@ -20,6 +20,7 @@ import {
   type DeskPhoto,
   type PhotoRow,
 } from "@/lib/photos/getPhotos";
+import JournalDesk from "@/components/JournalDesk";
 import { PHOTO_CATEGORIES, type PhotoCategory } from "@/types/photo";
 
 const BUCKET = "photos";
@@ -601,6 +602,8 @@ export default function AdminDesk() {
           </ul>
         )}
       </section>
+
+      <JournalDesk photos={photos} />
 
       {pendingDelete ? (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 px-5">

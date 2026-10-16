@@ -1,11 +1,18 @@
+import type { Photo } from "@/types/photo";
+
 export type JournalEntry = {
   id: number;
-  slug: string;
   title: string;
+  slug: string;
   date: string;
   location?: string;
   excerpt?: string;
   body?: string;
-  coverImage: string;
-  photoIds: number[];
+  coverPhotoId?: number | null;
+  published: boolean;
+  featured: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  photos: Photo[];
+  cover?: Photo | null;
 };

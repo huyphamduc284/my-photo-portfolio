@@ -18,7 +18,7 @@ export type DeskPhoto = Photo & {
   storagePath?: string;
 };
 
-function createPublicClient() {
+export function createPublicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -115,4 +115,12 @@ export async function getPhotosFromSupabase(): Promise<{
       error: error instanceof Error ? error.message : "Supabase photos query failed.",
     };
   }
+}
+
+export function pickFeaturedHomePhoto(photos: Photo[]): Photo | null {
+  return photos.find((photo) => photo.favorite) ?? photos[0] ?? null;
+}
+
+export function pickHomePreviewPhotos(photos: Photo[], limit = 12): Photo[] {
+  return photos.slice(0, limit);
 }

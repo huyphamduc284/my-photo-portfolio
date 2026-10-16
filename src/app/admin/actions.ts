@@ -7,3 +7,12 @@ export async function revalidateArchive() {
   revalidatePath("/archive");
   revalidatePath("/admin");
 }
+
+export async function revalidateJournal(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/journal");
+  revalidatePath("/admin");
+  if (slug) {
+    revalidatePath(`/journal/${slug}`);
+  }
+}

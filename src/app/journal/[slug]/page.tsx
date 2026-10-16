@@ -2,8 +2,11 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getJournalBySlug, getJournalEntries } from "@/lib/journal";
-import { getPhotosByIds } from "@/lib/photos";
+import {
+  getPublishedJournalSlugs,
+} from "@/lib/journal/getJournalEntries";
+import { getPublishedJournalEntryBySlug } from "@/lib/journal/getJournalEntryBySlug";
+import { formatPhotoDate } from "@/lib/archive";
 import JournalGallery from "@/components/JournalGallery";
 
 type JournalEntryPageProps = {
@@ -13,31 +16,34 @@ type JournalEntryPageProps = {
 };
 
 export async function generateStaticParams() {
-  return getJournalEntries().map((entry) => ({ slug: entry.slug }));
+  const slugs = await getPublishedJournalSlugs();
+  if (slugs.length === 0) {
+    return [{ slug: "_" }];
+  }
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: JournalEntryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const entry = getJournalBySlug(slug);
+  const entry = await getPublishedJournalEntryBySlug(slug);
   if (!entry) return { title: "Journal" };
   return { title: entry.title };
 }
 
 async function JournalEntryContent({ params }: JournalEntryPageProps) {
   const { slug } = await params;
-  const entry = getJournalBySlug(slug);
+  const entry = await getPublishedJournalEntryBySlug(slug);
 
   if (!entry) notFound();
 
-  const photos = getPhotosByIds(entry.photoIds);
   const paragraphs = (entry.body ?? "").split("\n\n").filter(Boolean);
 
   return (
     <article className="mx-auto w-full max-w-5xl px-5 pb-24 pt-12 sm:px-8 sm:pt-16 lg:px-10">
       <p className="font-mono text-[11px] tracking-[0.18em] text-muted">
-        {entry.date}
+        {formatPhotoDate(entry.date)}
         {entry.location ? (
           <>
             <br />
@@ -54,7 +60,7 @@ async function JournalEntryContent({ params }: JournalEntryPageProps) {
           <p key={paragraph}>{paragraph}</p>
         ))}
       </div>
-      <JournalGallery photos={photos} />
+      <JournalGallery photos={entry.photos} />
       <p className="mt-20">
         <Link
           href="/journal"

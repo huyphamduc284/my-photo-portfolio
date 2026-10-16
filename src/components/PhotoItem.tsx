@@ -1,20 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Photo } from "@/types/photo";
-import {
-  ARCHIVE_SIZES,
-  getPhotoAlt,
-  getPhotoDimensions,
-  getPhotoSrc,
-} from "@/lib/photos";
+import { ARCHIVE_SIZES } from "@/lib/photos";
+import NaturalPhoto from "@/components/NaturalPhoto";
 
 type PhotoItemProps = {
   photo: Photo;
   showMeta?: boolean;
   scrapbook?: "print" | "tilt" | "tape" | "none";
   sizes?: string;
+  quality?: number;
+  eager?: boolean;
   onSelect?: (photo: Photo) => void;
 };
 
@@ -23,12 +20,12 @@ export default function PhotoItem({
   showMeta = true,
   scrapbook = "none",
   sizes = ARCHIVE_SIZES,
+  quality = 95,
+  eager = false,
   onSelect,
 }: PhotoItemProps) {
-  const { width, height } = getPhotoDimensions(photo);
   const frameRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [near, setNear] = useState(false);
+  const [near, setNear] = useState(eager);
   const [shown, setShown] = useState(false);
   const frameClass =
     scrapbook === "print"
@@ -39,6 +36,7 @@ export default function PhotoItem({
   const tiltClass = scrapbook === "tilt" ? "origin-center -rotate-1" : "";
 
   useEffect(() => {
+    if (eager) return;
     const node = frameRef.current;
     if (!node) return;
 
@@ -58,14 +56,7 @@ export default function PhotoItem({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const image = imageRef.current;
-    if (image?.complete && image.naturalWidth > 0) {
-      setShown(true);
-    }
-  }, [near]);
+  }, [eager]);
 
   return (
     <figure className={`group ${tiltClass}`}>
@@ -76,24 +67,31 @@ export default function PhotoItem({
           aria-label={`Open photograph from ${photo.location ?? photo.date}`}
           className="block w-full cursor-pointer overflow-hidden text-left"
         >
-          <div
-            ref={frameRef}
-            className="relative w-full bg-background-warm"
-            style={{ aspectRatio: `${width} / ${height}` }}
-          >
+          <div ref={frameRef}>
             {near ? (
-              <Image
-                ref={imageRef}
-                src={getPhotoSrc(photo)}
-                alt={getPhotoAlt(photo)}
-                fill
-                loading="lazy"
-                quality={95}
+              <NaturalPhoto
+                photo={photo}
                 sizes={sizes}
-                className={`cursor-pointer object-contain archive-photo ${shown ? "is-shown" : ""}`}
-                onLoad={() => setShown(true)}
+                quality={quality}
+                preload={eager}
+                loading={eager ? "eager" : "lazy"}
+                className={`cursor-pointer archive-photo ${shown ? "is-shown" : ""}`}
+                onReady={() => setShown(true)}
               />
-            ) : null}
+            ) : (
+              <div
+                className="w-full"
+                style={{
+                  aspectRatio: photo.width && photo.height
+                    ? `${photo.width} / ${photo.height}`
+                    : photo.orientation === "portrait"
+                      ? "2 / 3"
+                      : photo.orientation === "landscape"
+                        ? "3 / 2"
+                        : "2 / 3",
+                }}
+              />
+            )}
           </div>
         </button>
       </div>
