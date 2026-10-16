@@ -1,12 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   experimental: {
     agentFeedback: true,
   },
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    qualities: [75, 95, 100],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ohvvmcdcmzrzmfvalzal.supabase.co",
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {
